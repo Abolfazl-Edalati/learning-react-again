@@ -1,56 +1,93 @@
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import ExpenseList from "./ExpenseList";
+
+const schema = z.object({
+  description: z.string(),
+  price: z.string(),
+  category: z.string(),
+});
+
+type FormData = z.infer<typeof schema>;
+
+type Expenses = FormData[];
+
 const ExpenseForm = () => {
+  const [expenses, setExpenses] = useState<Expenses>([
+    {
+      category: "",
+      description: "",
+      price: "",
+    },
+  ]);
+
+  const [isEmpty, setEmptyState] = useState(true);
+
+  const { register, handleSubmit } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = (data: FormData) => {
+    isEmpty
+      ? setExpenses([
+          {
+            description: data.description,
+            price: data.price,
+            category: data.category,
+          },
+        ])
+      : setExpenses([
+          ...expenses,
+          {
+            description: data.description,
+            price: data.price,
+            category: data.category,
+          },
+        ]);
+
+    setEmptyState(false);
+  };
   return (
     <div>
-      <form className="p-4 space-y-2">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="desc" className="">
-            Description
-          </label>
+      <form className="p-4" onSubmit={handleSubmit(onSubmit)}>
+        <div className="form-group">
+          <label htmlFor="description">Description</label>
           <input
-            id="desc"
+            id="description"
+            {...register("description")}
             type="text"
-            className="border rounded-xl max-w-60 px-3 py-1 border-zinc-500"
+            className="form-control"
           />
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="form-group">
           <label htmlFor="price" className="">
             Price
           </label>
           <input
             id="price"
+            {...register("price")}
             type="text"
-            className="border rounded-xl max-w-60 px-3 py-1 border-zinc-500"
+            className="form-control"
           />
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="form-group">
           <label htmlFor="category">Category</label>
           <select
-            name="category"
+            {...register("category")}
             id="category"
-            className="border rounded-xl max-w-60 px-2 py-1 border-zinc-500"
+            className="form-control"
           >
-            <option value="all" selected>
-              All Categories
-            </option>
+            <option value="">Select a category</option>
             <option value="groceries">Groceries</option>
             <option value="utilities">Utilities</option>
           </select>
         </div>
+        <button className="btn btn-primary mt-2">Submit</button>
       </form>
-
-      <table className="table">
-        <thead>
-          <tr>
-            <th scope="col">Description</th>
-            <th>Price</th>
-            <th>Category</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr></tr>
-        </tbody>
-      </table>
+      <br />
+      {!isEmpty && <ExpenseList expenses={expenses} />}
     </div>
   );
 };
