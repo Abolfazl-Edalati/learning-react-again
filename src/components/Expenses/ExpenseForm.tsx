@@ -5,7 +5,7 @@ const ExpenseForm = () => {
         <label htmlFor="desc" className="">
           Description
         </label>
-        <input id="desc" type="text" />
+        <input id="desc" type="text" className="" />
       </form>
     </div>
   );
