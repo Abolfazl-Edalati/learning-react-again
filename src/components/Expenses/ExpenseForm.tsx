@@ -1,93 +1,81 @@
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import categories from "./categories";
+import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import ExpenseList from "./ExpenseList";
+import { useForm } from "react-hook-form";
+
+interface Props {
+  onSubmit: (data: ExpenseFormData) => void;
+}
 
 const schema = z.object({
-  description: z.string(),
-  price: z.string(),
-  category: z.string(),
+  description: z.string().min(3).max(50),
+  price: z.number().min(0.01).max(100_000),
+  category: z.enum(categories),
 });
 
-type FormData = z.infer<typeof schema>;
+type ExpenseFormData = z.infer<typeof schema>;
 
-type Expenses = FormData[];
-
-const ExpenseForm = () => {
-  const [expenses, setExpenses] = useState<Expenses>([
-    {
-      category: "",
-      description: "",
-      price: "",
-    },
-  ]);
-
-  const [isEmpty, setEmptyState] = useState(true);
-
-  const { register, handleSubmit } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  });
-
-  const onSubmit = (data: FormData) => {
-    isEmpty
-      ? setExpenses([
-          {
-            description: data.description,
-            price: data.price,
-            category: data.category,
-          },
-        ])
-      : setExpenses([
-          ...expenses,
-          {
-            description: data.description,
-            price: data.price,
-            category: data.category,
-          },
-        ]);
-
-    setEmptyState(false);
-  };
+const ExpenseForm = ({ onSubmit }: Props) => {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ExpenseFormData>({ resolver: zodResolver(schema) });
   return (
     <div>
-      <form className="p-4" onSubmit={handleSubmit(onSubmit)}>
-        <div className="form-group">
-          <label htmlFor="description">Description</label>
+      <form
+        className="p-4"
+        onSubmit={handleSubmit((data) => {
+          onSubmit(data);
+          reset();
+        })}
+      >
+        <div className="form-group mb-3">
+          <label htmlFor="description" className="form-label">
+            Description
+          </label>
           <input
             id="description"
             {...register("description")}
             type="text"
             className="form-control"
           />
+          {errors.description && <p>{errors.description?.message}</p>}
         </div>
-        <div className="form-group">
-          <label htmlFor="price" className="">
+        <div className="form-group mb-3">
+          <label htmlFor="price" className="form-label">
             Price
           </label>
           <input
             id="price"
-            {...register("price")}
+            {...register("price", { valueAsNumber: true })}
             type="text"
             className="form-control"
           />
+          {errors.price && <p>{errors.price?.message}</p>}
         </div>
-        <div className="form-group">
-          <label htmlFor="category">Category</label>
+        <div className="form-group mb-3">
+          <label htmlFor="category" className="form-label">
+            Category
+          </label>
           <select
-            {...register("category")}
             id="category"
-            className="form-control"
+            {...register("category")}
+            className="form-select"
           >
             <option value="">Select a category</option>
-            <option value="groceries">Groceries</option>
-            <option value="utilities">Utilities</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
+          {errors.category && <p>{errors.category?.message}</p>}
         </div>
-        <button className="btn btn-primary mt-2">Submit</button>
+        <button className="btn btn-primary ">Submit</button>
       </form>
       <br />
-      {!isEmpty && <ExpenseList expenses={expenses} />}
     </div>
   );
 };
