@@ -1,27 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
-const UseEffect = () => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current?.focus();
-    }
-  });
+const UseEffect = ({ category }: { category: string }) => {
+  const [products, setProducts] = useState<string[]>([]);
 
   useEffect(() => {
-    document.title = "My App";
-  });
+    console.log("fetching product to " + category);
+    setProducts(["Clothing", "Household"]);
+  }, [category]);
 
   return (
-    <>
-      <input
-        ref={inputRef}
-        type="text"
-        className="form-control m-2"
-        style={{ width: "50%" }}
-      />
-    </>
+    <div className="m-2">
+      <span>Product List</span>
+    </div>
   );
 };
 
