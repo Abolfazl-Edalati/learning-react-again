@@ -6,11 +6,14 @@ const UseEffect = ({ category }: { category: string }) => {
   useEffect(() => {
     console.log("fetching product to " + category);
     setProducts(["Clothing", "Household"]);
+
+    return () => console.log("Disconnected");
   }, [category]);
 
   return (
     <div className="m-2">
       <span>Product List</span>
+      <br />
     </div>
   );
 };
