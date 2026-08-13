@@ -57,20 +57,63 @@ const Fetch = () => {
       });
   };
 
+  const onCreate = () => {
+    const newUser = { id: 12, name: "Abolfazl Edalati" };
+    const originalUsers = [...users];
+
+    setUsers([newUser, ...users]);
+
+    axios
+      .post("https://jsonplaceholder.typicode.com/users", newUser)
+      .then(({ data }) => setUsers([data, ...users]))
+      .catch((err) => {
+        setError(err.message);
+        setUsers(originalUsers);
+      });
+  };
+
+  const onUpdate = (user: User) => {
+    const originalUsers = [...users];
+    const updatedUser = { ...user, name: user.name + "!" };
+
+    setUsers(users.map((u) => (user.id === u.id ? updatedUser : u)));
+
+    axios
+      .patch("https://jsonplaceholder.typicode.com/users/" + user.id)
+      .catch((err) => {
+        setError(err.message);
+        setUsers(originalUsers);
+      });
+  };
+
   return (
-    <div>
+    <div className="p-4">
       {error && <p className="text-red-700 mb-5">{error}</p>}
       {isLoading && <span className="spinner-border"></span>}
+      <button
+        className="px-4 py-2 text-sm rounded-xl bg-blue-500 text-white mb-4 font-semibold cursor-pointer"
+        onClick={() => onCreate()}
+      >
+        Add
+      </button>
       <ul className="list-none space-y-2">
         {users.map((user) => (
-          <li key={user.id} className="flex justify-between max-w-2xs">
+          <li key={user.id} className="flex justify-between max-w-xl">
             {user.name}
-            <button
-              className=" border p-2 rounded-xl border-red-500 text-red-600 font-semibold cursor-pointer"
-              onClick={() => onDelete(user)}
-            >
-              Delete
-            </button>
+            <div className="space-x-2">
+              <button
+                className=" border p-2 rounded-xl border-gray-500 text-gray-600 font-semibold cursor-pointer"
+                onClick={() => onUpdate(user)}
+              >
+                Update
+              </button>
+              <button
+                className=" border p-2 rounded-xl border-red-500 text-red-600 font-semibold cursor-pointer"
+                onClick={() => onDelete(user)}
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>
